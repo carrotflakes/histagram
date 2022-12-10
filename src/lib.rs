@@ -18,8 +18,9 @@ pub fn make_histogram(mut iter: impl Iterator<Item = f64>) -> (f64, f64, Vec<usi
         let mut min = first.min(second);
         let mut max = first.max(second);
         let mut buckets = vec![0; desire_size];
-        buckets[0] = first_count;
-        buckets[desire_size - 1] = 1;
+        buckets[0] = if min == first { first_count } else { 1 };
+        buckets[desire_size - 1] = if max == first { first_count } else { 1 };
+
         for x in iter {
             while x < min {
                 // extend lower bound
@@ -48,7 +49,7 @@ pub fn make_histogram(mut iter: impl Iterator<Item = f64>) -> (f64, f64, Vec<usi
 
 pub fn histagram(iter: impl Iterator<Item = f64>) {
     let (lower, uppper, data) = make_histogram(iter);
-    if lower.is_nan() {
+    if data.is_empty() {
         println!("No data");
     } else {
         println!("{} {} {:?}", lower, uppper, data);
