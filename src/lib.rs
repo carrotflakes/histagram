@@ -30,7 +30,6 @@ pub fn histagram(mut iter: impl Iterator<Item = f64>) {
                 }
                 buckets[0..desire_size / 2].fill(0);
                 min -= max - min;
-                dbg!(min);
             }
             while max <= x {
                 // extend upper bound
@@ -39,10 +38,8 @@ pub fn histagram(mut iter: impl Iterator<Item = f64>) {
                 }
                 buckets[desire_size / 2..].fill(0);
                 max += max - min;
-                dbg!(max);
             }
             buckets[((x - min) * desire_size as f64 / (max - min)).floor() as usize] += 1;
-            println!("{} {} {:?}", min, max, buckets);
         }
         println!("{} {} {:?}", min, max, buckets);
     } else {
