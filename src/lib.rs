@@ -1,4 +1,4 @@
-pub fn histagram(mut iter: impl Iterator<Item = f64>) {
+pub fn make_histogram(mut iter: impl Iterator<Item = f64>) -> (f64, f64, Vec<usize>) {
     let desire_size = 30;
     if let Some(first) = iter.next() {
         let mut first_count = 1;
@@ -9,8 +9,7 @@ pub fn histagram(mut iter: impl Iterator<Item = f64>) {
                         break x;
                     }
                 } else {
-                    println!("All {}", first);
-                    return;
+                    return (first, first, vec![first_count]);
                 }
                 first_count += 1;
             }
@@ -41,8 +40,17 @@ pub fn histagram(mut iter: impl Iterator<Item = f64>) {
             }
             buckets[((x - min) * desire_size as f64 / (max - min)).floor() as usize] += 1;
         }
-        println!("{} {} {:?}", min, max, buckets);
+        (min, max, buckets)
     } else {
+        (f64::NAN, f64::NAN, vec![])
+    }
+}
+
+pub fn histagram(iter: impl Iterator<Item = f64>) {
+    let (lower, uppper, data) = make_histogram(iter);
+    if lower.is_nan() {
         println!("No data");
+    } else {
+        println!("{} {} {:?}", lower, uppper, data);
     }
 }
