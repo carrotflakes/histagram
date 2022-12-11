@@ -1,5 +1,5 @@
 pub fn make_histogram(mut iter: impl Iterator<Item = f64>) -> (f64, f64, Vec<usize>) {
-    let desire_size = 30;
+    let desire_size = 60;
     if let Some(first) = iter.next() {
         let mut first_count = 1;
         let second = {
@@ -53,5 +53,22 @@ pub fn histagram(iter: impl Iterator<Item = f64>) {
         println!("No data");
     } else {
         println!("{} {} {:?}", lower, uppper, data);
+        let scale = 10;
+        let max = data.iter().copied().max().unwrap();
+        for i in 0..scale {
+            print!("{:>6}|", max * (scale - i - 1) / (scale - 1));
+            for x in data.iter() {
+                print!(
+                    "{}",
+                    if scale * x / max > scale - i - 1 {
+                        "*"
+                    } else {
+                        " "
+                    }
+                );
+            }
+            println!("|");
+        }
+        println!("{} {:<8}{}{:>8}", " ".repeat(6), lower, " ".repeat(data.len().saturating_sub(16)) , uppper);
     }
 }
