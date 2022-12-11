@@ -8,7 +8,7 @@ pub struct Result {
 }
 
 impl Result {
-    pub fn shrink(&self) -> Result {
+    pub fn trim(&self) -> Result {
         if self.buckets.is_empty() {
             return self.clone();
         }
@@ -24,8 +24,8 @@ impl Result {
     }
 }
 
-pub fn make_histogram(mut iter: impl Iterator<Item = f64>) -> Result {
-    let desire_size = 60;
+pub fn make_histogram(bucket_size: usize, mut iter: impl Iterator<Item = f64>) -> Result {
+    assert!(10 < bucket_size);
     if let Some(first) = iter.next() {
         let mut first_count = 1;
         let second = {
@@ -51,31 +51,31 @@ pub fn make_histogram(mut iter: impl Iterator<Item = f64>) -> Result {
         let mut max = first.max(second);
         let mut lower = min;
         let mut upper = max;
-        let mut buckets = vec![0; desire_size];
+        let mut buckets = vec![0; bucket_size];
         buckets[0] = if lower == first { first_count } else { 1 };
-        buckets[desire_size - 1] = if upper == first { first_count } else { 1 };
+        buckets[bucket_size - 1] = if upper == first { first_count } else { 1 };
 
         for x in iter {
             min = min.min(x);
             max = max.max(x);
             while x < lower {
                 // extend lower bound
-                for i in 0..desire_size / 2 {
-                    buckets[desire_size - i - 1] =
-                        buckets[desire_size - i * 2 - 1] + buckets[desire_size - i * 2 - 2];
+                for i in 0..bucket_size / 2 {
+                    buckets[bucket_size - i - 1] =
+                        buckets[bucket_size - i * 2 - 1] + buckets[bucket_size - i * 2 - 2];
                 }
-                buckets[0..desire_size / 2].fill(0);
+                buckets[0..bucket_size / 2].fill(0);
                 lower -= upper - lower;
             }
             while upper <= x {
                 // extend upper bound
-                for i in 0..desire_size / 2 {
+                for i in 0..bucket_size / 2 {
                     buckets[i] = buckets[i * 2] + buckets[i * 2 + 1];
                 }
-                buckets[desire_size / 2..].fill(0);
+                buckets[bucket_size / 2..].fill(0);
                 upper += upper - lower;
             }
-            buckets[((x - lower) * desire_size as f64 / (upper - lower)).floor() as usize] += 1;
+            buckets[((x - lower) * bucket_size as f64 / (upper - lower)).floor() as usize] += 1;
         }
         Result {
             min,
@@ -101,7 +101,7 @@ pub fn histagram(iter: impl Iterator<Item = f64>) {
         upper,
         buckets,
         ..
-    } = make_histogram(iter).shrink();
+    } = make_histogram(100, iter).trim();
 
     if buckets.is_empty() {
         println!("No data");
