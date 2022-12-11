@@ -1,6 +1,6 @@
 # histagram
 
-Easily print histograms from Iterator.
+Print histograms from Iterator easily.
 
 ``` rust
 histagram::histagram(some_iterator_of_f64());
